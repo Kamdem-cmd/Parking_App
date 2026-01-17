@@ -1,0 +1,1 @@
+dans ce dossier sera stocker les images utiles à l'interfaces de notre application.
