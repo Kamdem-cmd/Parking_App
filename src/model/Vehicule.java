@@ -1,23 +1,40 @@
+package model;
+
+import java.time.LocalDateTime;
+
 public class Vehicule {
-    private String matricule;
-    private typeVehicule type;
-    private Ticket ticket;
-    
-    public Vehicule(String matricule, typeVehicule type) {
-        this.matricule = matricule;
+    private String immatriculation;
+    private String marque;
+    private TypeVehicule type;
+    private LocalDateTime heureEntree;
+
+    // Constructeur
+    public Vehicule(String immatriculation, String marque, TypeVehicule type) {
+        this.immatriculation = immatriculation;
+        this.marque = marque;
         this.type = type;
+        this.heureEntree = LocalDateTime.now(); // L'heure est définie à la création
     }
-    public String getMatricule() {
-        return matricule;
+
+    // Getters
+    public String getImmatriculation() {
+        return immatriculation;
     }
-    public typeVehicule getType() {
+
+    public String getMarque() {
+        return marque;
+    }
+
+    public TypeVehicule getType() {
         return type;
     }
+
+    public LocalDateTime getHeureEntree() {
+        return heureEntree;
+    }
+
     @Override
     public String toString() {
-        return "Vehicule{" +
-                "matricule='" + matricule + '\'' +
-                ", type='" + type + '\'' +
-                '}';
+        return "Véhicule [Immat=" + immatriculation + ", Marque=" + marque + ", Type=" + type + "]";
     }
 }

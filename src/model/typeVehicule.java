@@ -1,3 +1,7 @@
-public enum typeVehicule {
-    VOITURE, MOTO, CAMION
+package model;
+
+public enum TypeVehicule {
+    VOITURE,
+    MOTO,
+    CAMION
 }
