@@ -1,63 +1,37 @@
 package events;
 
 import model.*;
-import java.util.Scanner;
 
 public class Event {
 
-    // Logique pour traiter l'entrée d'un véhicule
-    public void traiterEntreeVehicule(Parking parking, String immatriculation, String marque, String typeStr) {
-        // 1. Vérifier disponibilité
+    // Retourne un message pour l'UI après avoir tenté de garer un véhicule
+    public String gererEntree(Parking parking, String immat, String marque, String typeStr) {
         Place placeDispo = parking.trouverPlaceDisponible();
 
         if (placeDispo == null) {
-            System.out.println("ERREUR: Le parking est complet !");
-            return;
+            return "Désolé, le parking est complet !";
         }
 
-        // 2. Convertir le type (String -> Enum)
-        TypeVehicule type;
         try {
-            type = TypeVehicule.valueOf(typeStr.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            System.out.println("ERREUR: Type de véhicule invalide (VOITURE, MOTO, CAMION).");
-            return;
+            TypeVehicule type = TypeVehicule.valueOf(typeStr.toUpperCase());
+            Vehicule v = new Vehicule(immat, marque, type);
+            placeDispo.garerVehicule(v);
+            return "Succès ! Véhicule garé à la place n°" + placeDispo.getNumero();
+        } catch (Exception e) {
+            return "Erreur lors de l'entrée : " + e.getMessage();
         }
-
-        // 3. Créer le véhicule et garer
-        Vehicule nouveauVehicule = new Vehicule(immatriculation, marque, type);
-        placeDispo.garerVehicule(nouveauVehicule);
-
-        System.out.println("SUCCÈS: Véhicule garé à la place numéro " + placeDispo.getNumero());
     }
 
-    // Logique pour traiter la sortie d'un véhicule par numéro de place
-    public void traiterSortieVehicule(Parking parking, int numeroPlace) {
-        // Trouver la place
-        Place placeConcernee = null;
+    // Retourne le contenu du ticket sous forme de texte pour la sortie
+    public String gererSortie(Parking parking, int numeroPlace) {
         for (Place p : parking.getPlaces()) {
-            if (p.getNumero() == numeroPlace) {
-                placeConcernee = p;
-                break;
+            if (p.getNumero() == numeroPlace && p.estOccupee()) {
+                Vehicule v = p.libererPlace();
+                Ticket t = new Ticket(v, p);
+                parking.ajouterChiffreAffaires(t.getMontant());
+                return t.toString();
             }
         }
-
-        if (placeConcernee == null || !placeConcernee.estOccupee()) {
-            System.out.println("ERREUR: Place introuvable ou déjà libre.");
-            return;
-        }
-
-        // Libérer et générer ticket
-        Vehicule v = placeConcernee.libererPlace();
-        Ticket ticket = new Ticket(v, placeConcernee);
-
-        // Mise à jour CA
-        // Note: Ici nous n'avons pas accès direct au montant du ticket car il est privé
-        // dans Ticket,
-        // Vos coéquipiers devront peut-être ajouter un getter dans Ticket.java.
-        // Pour l'instant, on affiche juste le ticket.
-
-        System.out.println(ticket.toString());
-        System.out.println("Au revoir !");
+        return "Erreur : Place déjà vide ou introuvable.";
     }
 }

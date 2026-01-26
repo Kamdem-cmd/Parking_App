@@ -1,16 +1,17 @@
+import javax.swing.SwingUtilities;
 import model.Parking;
 import ui.UI;
 
 public class Main {
     public static void main(String argv[]) {
-        // 1. Initialisation du Parking (par exemple 10 places)
-        Parking monParking = new Parking(10);
+        // Création du parking avec 16 places par exemple
+        Parking monParking = new Parking(16);
 
-        // 2. Initialisation de l'interface utilisateur
-        UI interfaceUtilisateur = new UI();
-
-        // 3. Lancement de l'application
-        System.out.println("Démarrage du système Java Garage...");
-        interfaceUtilisateur.demarrerInterface(monParking);
+        // Lancement de l'interface graphique dans le thread approprié
+        SwingUtilities.invokeLater(() -> {
+            UI gui = new UI(monParking);
+            gui.setVisible(true);
+            gui.setLocationRelativeTo(null); // Centrer l'écran
+        });
     }
 }

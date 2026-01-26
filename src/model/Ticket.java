@@ -24,6 +24,10 @@ public class Ticket {
         return minutes * 0.50;
     }
 
+    public double getMontant() {
+        return montant;
+    }
+
     @Override
     public String toString() {
         return "--- TICKET ---\n" +
