@@ -3,37 +3,45 @@ package model;
 public class Place {
     private int numero;
     private boolean estOccupee;
-    private Vehicule vehiculeGaré; // Référence au véhicule garé ici
+    private boolean estReservee; // Nouveau: Pour la fonctionnalité de réservation
+    private Vehicule vehiculeGare;
 
     public Place(int numero) {
         this.numero = numero;
         this.estOccupee = false;
-        this.vehiculeGaré = null;
-    }
-
-    public boolean estOccupee() {
-        return estOccupee;
+        this.estReservee = false;
     }
 
     public int getNumero() {
         return numero;
     }
 
-    public Vehicule getVehicule() {
-        return vehiculeGaré;
+    public boolean estOccupee() {
+        return estOccupee || estReservee;
     }
 
-    // Méthode pour garer un véhicule
+    public boolean estReservee() {
+        return estReservee;
+    }
+
+    public void setReservee(boolean r) {
+        this.estReservee = r;
+    }
+
+    public Vehicule getVehicule() {
+        return vehiculeGare;
+    }
+
     public void garerVehicule(Vehicule v) {
-        this.vehiculeGaré = v;
+        this.vehiculeGare = v;
         this.estOccupee = true;
     }
 
-    // Méthode pour libérer la place
     public Vehicule libererPlace() {
-        Vehicule v = this.vehiculeGaré;
-        this.vehiculeGaré = null;
+        Vehicule v = this.vehiculeGare;
+        this.vehiculeGare = null;
         this.estOccupee = false;
+        this.estReservee = false;
         return v;
     }
 }
