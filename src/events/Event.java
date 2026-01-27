@@ -12,75 +12,76 @@ public class Event {
     // On sauvegarde tout : Immat, Marque, Type pour pouvoir recréer l'objet
     public void sauvegarderDonnees(List<Parking> parkings) {
         try (PrintWriter writer = new PrintWriter(new FileWriter(FILE_PATH))) {
-            for (Parking p : parkings) {
-                // Marqueur pour dire qu'on change de garage
-                writer.println("GARAGE:" + p.getNom());
+            // 1. On calcule et on sauvegarde le Revenu Total en haut du fichier
+            double totalGlobal = 0;
+            for (Parking p : parkings)
+                totalGlobal += p.getChiffreAffaires();
+            writer.println("REVENU_GLOBAL:" + totalGlobal);
 
+            // 2. On sauvegarde les véhicules pour chaque garage
+            for (Parking p : parkings) {
+                writer.println("GARAGE:" + p.getNom());
                 for (Place pl : p.getPlaces()) {
                     if (pl.getVehicule() != null) {
                         Vehicule v = pl.getVehicule();
-                        // Format: VOITURE:NumPlace;Immat;Marque;Type
-                        writer.println("VOITURE:" + pl.getNumero() + ";" +
-                                v.getImmatriculation() + ";" +
-                                v.getMarque() + ";" +
-                                v.getType());
+                        String res = pl.estReservee() ? "YES" : "NO";
+                        // Format: VOITURE;Num;Immat;Marque;Type;EstReservee
+                        writer.println("VOITURE;" + pl.getNumero() + ";" + v.getImmatriculation() + ";" +
+                                v.getMarque() + ";" + v.getType() + ";" + res);
                     } else if (pl.estReservee()) {
-                        // Format: RESERVE:NumPlace
-                        writer.println("RESERVE:" + pl.getNumero());
+                        writer.println("RESERVE;" + pl.getNumero());
                     }
                 }
             }
-            System.out.println("Données sauvegardées avec succès.");
         } catch (IOException e) {
-            System.err.println("Erreur de sauvegarde : " + e.getMessage());
+            System.err.println("Erreur de sauvegarde: " + e.getMessage());
         }
     }
 
-    // --- 2. CHARGEMENT (NOUVEAU) ---
-    // Cette méthode lit le fichier et remplit les garages au démarrage
+    // --- CHARGEMENT : Restaure l'argent et les véhicules ---
     public void chargerDonnees(List<Parking> parkings) {
         File file = new File(FILE_PATH);
         if (!file.exists())
-            return; // Si pas de fichier, on ne fait rien
+            return;
 
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String line;
             Parking parkingActuel = null;
 
             while ((line = reader.readLine()) != null) {
-                if (line.startsWith("GARAGE:")) {
-                    // On trouve le bon parking dans la liste
-                    String nomGarage = line.split(":")[1];
+                // A. Charger le Revenu Global
+                if (line.startsWith("REVENU_GLOBAL:")) {
+                    double money = Double.parseDouble(line.split(":")[1]);
+                    // On peut distribuer l'argent au premier parking ou le diviser
+                    // Ici on le met sur le premier pour garder le compte global exact
+                    if (!parkings.isEmpty())
+                        parkings.get(0).setChiffreAffaires(money);
+                }
+                // B. Identifier le Garage
+                else if (line.startsWith("GARAGE:")) {
+                    String nom = line.split(":")[1];
                     for (Parking p : parkings) {
-                        if (p.getNom().equals(nomGarage)) {
+                        if (p.getNom().equals(nom))
                             parkingActuel = p;
-                            break;
-                        }
                     }
-                } else if (line.startsWith("VOITURE:") && parkingActuel != null) {
-                    // On recrée la voiture
-                    try {
-                        String[] data = line.split(":")[1].split(";");
-                        int numPlace = Integer.parseInt(data[0]);
-                        String immat = data[1];
-                        String marque = data[2];
-                        String typeStr = data[3];
-
-                        Vehicule v = new Vehicule(immat, marque, TypeVehicule.valueOf(typeStr));
-
-                        // On la met dans la bonne place (Index = num - 1)
-                        parkingActuel.getPlaces().get(numPlace - 1).garerVehicule(v);
-                    } catch (Exception e) {
-                        System.err.println("Erreur lecture voiture : " + line);
-                    }
-                } else if (line.startsWith("RESERVE:") && parkingActuel != null) {
-                    // On remet la réservation
-                    int numPlace = Integer.parseInt(line.split(":")[1]);
-                    parkingActuel.getPlaces().get(numPlace - 1).setReservee(true);
+                }
+                // C. Recréer les voitures
+                else if (line.startsWith("VOITURE;") && parkingActuel != null) {
+                    String[] d = line.split(";");
+                    Vehicule v = new Vehicule(d[2], d[3], TypeVehicule.valueOf(d[4]));
+                    Place pl = parkingActuel.getPlaces().get(Integer.parseInt(d[1]) - 1);
+                    pl.garerVehicule(v);
+                    if (d[5].equals("YES"))
+                        pl.setReservee(true);
+                }
+                // D. Recréer les réservations vides
+                else if (line.startsWith("RESERVE;") && parkingActuel != null) {
+                    int num = Integer.parseInt(line.split(";")[1]);
+                    parkingActuel.getPlaces().get(num - 1).setReservee(true);
                 }
             }
-        } catch (IOException e) {
-            System.err.println("Erreur de chargement : " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Erreur de chargement: " + e.getMessage());
         }
     }
 

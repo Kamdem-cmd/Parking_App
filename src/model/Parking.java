@@ -18,6 +18,10 @@ public class Parking {
         }
     }
 
+    public void setChiffreAffaires(double montant) {
+        this.chiffreAffaires = montant;
+    }
+
     public String getNom() {
         return nom;
     }
