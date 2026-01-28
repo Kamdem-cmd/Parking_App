@@ -1,0 +1,29 @@
+Compiler le document vous meme dans un fichier bin.
+
+Je vous montre comment creer le fichier bin et compiler, mais il y'a deja un fichier bin avec la version compiler dans le document dans un fichier bin
+
+
+
+Creer le fichier bin: 
+
+mkdir bin
+
+
+
+compiler dans le fichier bin:
+
+javac -d bin src/model/*.java src/events/Event.java src/ui/UI.java src/Main.java
+
+
+
+Lancer le program qui est dans le fichier bin: 
+
+java -cp bin Main
+
+
+
+Tous ces commandes doivent etre lancer dans un terminal du fichier contenant le projet entier!
+
+
+comme le projet a deja ete compiler, lancer juste la commande: java -cp bin Main
+pour lancer le program.
